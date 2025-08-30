@@ -50,7 +50,13 @@ pipeline {
 
         stage('Run Docker Container') {
             steps {
-                sh 'docker run -dt -p 8091:8091 --name c000 myimg'
+                sh '''
+                    # Remove existing container if it exists
+                    docker rm -f c000 || true
+
+                    # Run new container
+                    docker run -dt -p 8091:8091 --name c000 myimg
+                '''
             }
         }
     }
