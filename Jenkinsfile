@@ -12,6 +12,12 @@ pipeline {
             }
         }
 
+        stage('Build JAR') {
+            steps {
+                sh './mvnw clean package -DskipTests'
+            }
+        }
+
         stage('Docker Login') {
             steps {
                 withCredentials([usernamePassword(
