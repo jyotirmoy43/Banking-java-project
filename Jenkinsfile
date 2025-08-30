@@ -1,44 +1,48 @@
 pipeline {
     agent any
 
-    environment {
-        IMAGE_NAME = "jyotirmoy43/banking-app"
-    }
-
     stages {
-        stage('Clone Repo') {
+        stage('Checkout Code') {
             steps {
-                git 'https://github.com/jyotirmoy43/Banking-java-project.git'
+                git url: 'https://github.com/jyotirmoy43/Banking-java-project.git/'
+                echo 'Checked out code from GitHub'
             }
         }
 
-        stage('Build JAR') {
+        stage('Compile Code') {
             steps {
-                sh './mvnw clean package -DskipTests'
+                echo 'Starting compilation...'
+                sh 'mvn compile'
             }
         }
 
-        stage('Docker Login') {
+        stage('Run Tests') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-pwd',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
-                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
-                }
+                sh 'mvn test'
             }
         }
 
-        stage('Build Image') {
+        stage('QA - Code Quality') {
             steps {
-                sh 'docker build -t $IMAGE_NAME .'
+                sh 'mvn checkstyle:checkstyle'
             }
         }
 
-        stage('Push Image') {
+        stage('Package Application') {
             steps {
-                sh 'docker push $IMAGE_NAME'
+                sh 'mvn package'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t myimg .'
+            }
+        }
+
+        stage('Run Docker Container') {
+            steps {
+                sh 'docker run -dt -p 8091:8091 --name c000 myimg'
             }
         }
     }
