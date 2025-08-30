@@ -1,10 +1,18 @@
 pipeline {
     agent any
 
+    tools {
+        maven 'Maven_3.9.6' // Make sure this name matches what you configured in Jenkins UI
+    }
+
+    environment {
+        MAVEN_OPTS = "-Dmaven.repo.local=.m2/repository"
+    }
+
     stages {
         stage('Checkout Code') {
             steps {
-                git url: 'https://github.com/jyotirmoy43/Banking-java-project.git/'
+                git url: 'https://github.com/jyotirmoy43/Banking-java-project.git'
                 echo 'Checked out code from GitHub'
             }
         }
